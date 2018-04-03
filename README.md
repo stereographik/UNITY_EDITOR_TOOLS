@@ -1,7 +1,4 @@
 # UNITY_EDITOR_TOOLS
-Unity tools
-
-
 Unity Editor tools
 
 objects_terrain_spawner.cs
