@@ -1,5 +1,4 @@
-﻿//C# Example
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
@@ -15,34 +14,80 @@ public class objects_terrain_spawner : EditorWindow
     public Vector4 random_orientation =Vector3.zero;
     public float rayon = 1;
     public float density = 1;
-    public Object origine;
+    public Vector3 origine;
     public Vector3 offset_pos = Vector3.zero;
     public float main_scale =1f;
     GameObject container;
+    bool paint_enable = false;
+    string[] bg_colors = { "98D711", "A1A1A1" };
 
-
-
-
+    
     [MenuItem("stereographik/TERRAIN OBJECT SPAWNER")]
     public static void ShowWindow()
     {
         EditorWindow.GetWindow(typeof(objects_terrain_spawner));
         
     }
-    void Start() {
-       
+
+    void OnEnable()
+    {
+        SceneView.onSceneGUIDelegate += SceneGUI;
     }
+
+    void SceneGUI(SceneView sceneView)
+    {
+       
+       if (Event.current.type == EventType.MouseDown && paint_enable) {
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 10000))
+            {
+                if (hit.collider.gameObject.name == "Terrain")
+                {
+                    Debug.Log("TERRAIN HIT");
+                    origine = hit.point;
+                    spawn_assets();
+                }
+
+
+            }
+        }
+    }
+
+
+
     void OnGUI()
     {
 
         
 
 
-        GUILayout.Label("SPAWN CONFIG", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("Transform origine");
-        origine = EditorGUILayout.ObjectField(origine, typeof(GameObject), true);
 
-        EditorGUILayout.TextArea("", GUI.skin.horizontalSlider);
+        GUILayout.Label("PAINTING", EditorStyles.boldLabel);
+        if (paint_enable)
+        {
+            GUI.backgroundColor = HexToColor(bg_colors[0]);
+            if (GUILayout.Button("PAINTING ENABLED"))
+            {
+               
+                paint_enable = false;
+            }
+
+        }
+        else {
+            GUI.backgroundColor = HexToColor(bg_colors[1]);
+            if (GUILayout.Button("DISABLE PAINTING DISABLED"))
+            {
+               
+                paint_enable = true;
+            }
+        }
+        GUI.backgroundColor = Color.white;
+       //EditorGUILayout.LabelField("Transform origine");
+       //origine = EditorGUILayout.ObjectField(origine, typeof(GameObject), true);
+
+       EditorGUILayout.TextArea("", GUI.skin.horizontalSlider);
         EditorGUILayout.BeginVertical("Button");        
             EditorGUI.indentLevel+=3;
             EditorGUILayout.BeginFadeGroup(1);
@@ -75,7 +120,7 @@ public class objects_terrain_spawner : EditorWindow
 
         EditorGUILayout.BeginVertical("Button");
         EditorGUILayout.BeginFadeGroup(1);
-        GUILayout.Label("OPTIONS", EditorStyles.boldLabel);
+        GUILayout.Label("BRUSH OPTIONS", EditorStyles.boldLabel);
         EditorGUILayout.LabelField("Rayon");
         rayon=EditorGUILayout.Slider(rayon, 0f, 100f);
         EditorGUILayout.LabelField("Density");
@@ -88,10 +133,10 @@ public class objects_terrain_spawner : EditorWindow
         EditorGUILayout.EndVertical();
         EditorGUILayout.BeginHorizontal("Button");
         GUILayout.Space(25f);
-        if (GUILayout.Button("C R E A T E"))
+       /* if (GUILayout.Button("C R E A T E"))
         {
             spawn_assets();
-        }
+        }*/
         if (GUILayout.Button("R E M O V E"))
         {
             clear_assets();
@@ -102,6 +147,7 @@ public class objects_terrain_spawner : EditorWindow
         if (GameObject.Find("TERRAIN OBJECT SPAWNER") == null)
         {
             container = new GameObject();
+            container.tag = "veget";
 
         }
         Vector3[] pos_on_ground = get_raycast_hits();
@@ -134,7 +180,7 @@ public class objects_terrain_spawner : EditorWindow
     Vector3[] get_raycast_hits() {
         int nb_rays = lod_objs.Length;// Mathf.RoundToInt(density * 10f);
         Vector3[] resultat = new Vector3[nb_rays];
-        Vector3 ori = (origine as GameObject).transform.position;
+        Vector3 ori = origine;
         for (int u = 0; u < nb_rays; u++)
         {
             Vector2 rand_around = Random.insideUnitCircle * rayon;
@@ -151,5 +197,11 @@ public class objects_terrain_spawner : EditorWindow
 
         return resultat;
     }
-   
+    Color HexToColor(string hex)
+    {
+        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        return new Color32(r, g, b, 255);
+    }
 }
