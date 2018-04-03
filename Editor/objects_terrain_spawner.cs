@@ -77,7 +77,7 @@ public class objects_terrain_spawner : EditorWindow
         }
         else {
             GUI.backgroundColor = HexToColor(bg_colors[1]);
-            if (GUILayout.Button("DISABLE PAINTING DISABLED"))
+            if (GUILayout.Button("PAINTING DISABLED"))
             {
                
                 paint_enable = true;
