@@ -3,6 +3,12 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 
+// automaticaly map textures in material slots
+
+// step 1 : DRAG & DROP all textures in the Maps slot
+// step 2 : SELECT all the materials
+// step 3 : PRESS AUTOMAP
+
 public class automapper : EditorWindow
 {
     public Texture2D[] maps;
